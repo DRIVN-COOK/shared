@@ -1,30 +1,27 @@
 import axios from 'axios';
 
-// 1) Essai env Vite (sera résolu par le bundler de l'app consommatrice)
-const viteUrl =
-  typeof import.meta !== 'undefined' &&
-  (import.meta as any).env &&
-  ((import.meta as any).env.VITE_API_URL as string | undefined);
+// 1) Lu au build par Vite (dans chaque app qui consomme le shared)
+const viteUrl: string | undefined =
+  typeof import.meta !== 'undefined' && (import.meta as any).env
+    ? ((import.meta as any).env.VITE_API_URL as string | undefined)
+    : undefined;
 
-// 2) Fallback global (peut être injecté par une balise <script> avant le bundle)
-declare global {
-  interface Window { __API_URL__?: string; }
-}
-const globalUrl = typeof window !== 'undefined' ? window.__API_URL__ : undefined;
+// 2) Fallback runtime optionnel (tu peux le garder si tu veux pouvoir override via <script>)
+declare global { interface Window { __API_URL__?: string } }
+const runtimeUrl = typeof window !== 'undefined' ? window.__API_URL__ : undefined;
 
-// 3) Valeur par défaut (dev local)
-let BASE_URL = viteUrl || globalUrl || 'http://localhost:3000';
-
-// Permet à chaque app de définir explicitement l'URL (ex: depuis config.js)
-export function setApiBaseUrl(url: string) {
-  BASE_URL = url;
-  api.defaults.baseURL = url;
-}
+// 3) Valeur par défaut : **/api** (marche en prod via Nginx et en dev si proxy Vite)
+const BASE_URL = viteUrl ?? runtimeUrl ?? '/api';
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: false,
+  withCredentials: false, // passe à true seulement si tu utilises des cookies
 });
+
+// Helper pour changer dynamiquement si besoin
+export function setApiBaseUrl(url: string) {
+  api.defaults.baseURL = url;
+}
 
 // tokens...
 let accessToken: string | null = null;
