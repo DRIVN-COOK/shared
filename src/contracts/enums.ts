@@ -11,6 +11,7 @@ export const MAINTENANCE_TYPE = ['SERVICE','REPAIR','INSPECTION'] as const;
 export const MAINTENANCE_STATUS = ['PLANNED','IN_PROGRESS','DONE'] as const;
 
 export const ORDER_STATUS = ['PENDING','CONFIRMED','PREPARING','READY','FULFILLED','CANCELLED'] as const;
+export const ORDER_CHANNEL = ['IN_PERSON','ONLINE_PREORDER'] as const;
 export const PAYMENT_PROVIDER = ['CARD','CASH','ONLINE'] as const;
 export const PAYMENT_STATUS = ['PENDING','PAID','FAILED','REFUNDED'] as const;
 
@@ -18,3 +19,5 @@ export const CHANNEL = ['IN_PERSON','ONLINE_PREORDER'] as const;
 
 export const LOYALTY_TIER = ['BASIC','SILVER','GOLD'] as const;
 export const LOYALTY_TXN = ['EARN','SPEND','ADJUST'] as const;
+
+export const STOCK_MOVE_TYPE = ['PURCHASE_IN','TRANSFER_IN','TRANSFER_OUT','SALE_OUT','ADJUSTMENT'] as const;
