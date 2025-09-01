@@ -1,3 +1,4 @@
+// src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import { api, setTokens, loadTokensFromStorage } from '../api.js';
@@ -13,19 +14,42 @@ type Ctx = AuthState & {
 
 const AuthContext = createContext<Ctx | null>(null);
 
+// --- Type guard pour les tokens renvoyés par loadTokensFromStorage (dont le type n'est pas garanti) ---
+type AuthTokensLoose = { accessToken?: string; refreshToken?: string } | null | undefined;
+function hasTokens(x: unknown): x is { accessToken?: string; refreshToken?: string } {
+  return !!x && (typeof (x as any).accessToken === 'string' || typeof (x as any).refreshToken === 'string');
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, isLoading: true });
 
   useEffect(() => {
-    loadTokensFromStorage();
-    api.get('/auth/me')
-      .then((r) => setState({ user: r.data, isLoading: false }))
-      .catch(() => setState({ user: null, isLoading: false }));
+    // 1) Charger les tokens (sans supposer leur forme)
+    const raw: AuthTokensLoose = loadTokensFromStorage() as AuthTokensLoose;
+
+    // 2) Si pas de tokens valides -> ne pas appeler /auth/me (évite le 401 au boot)
+    if (!hasTokens(raw)) {
+      setState({ user: null, isLoading: false });
+      return;
+    }
+
+    // 3) Sinon, on tente /auth/me et on ignore silencieusement le 401
+    (async () => {
+      try {
+        const r = await api.get('/auth/me');
+        setState({ user: r.data, isLoading: false });
+      } catch (err: any) {
+        if (err?.response?.status !== 401) {
+          console.error(err);
+        }
+        setState({ user: null, isLoading: false });
+      }
+    })();
   }, []);
 
   const login = async (email: string, password: string) => {
     const r = await api.post('/auth/login', { email, password });
-    setTokens(r.data);
+    setTokens(r.data); // met les headers axios + stocke localStorage
     const me = await api.get('/auth/me');
     setState({ user: me.data, isLoading: false });
   };
