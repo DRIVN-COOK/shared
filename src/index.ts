@@ -1,6 +1,7 @@
-export * from "./components/index.js"
-export * from "./context/index.js"
-export * from './api.js';  
-export * from "./contracts/index.js"
+export * from "./components/index"
+export * from "./context/index"
+export * from './api'; 
+export * from "./contracts/index"
+export * from "./types/index"
 // export * from "./utils/index.js"
 // export * from "./hooks/index.js"
