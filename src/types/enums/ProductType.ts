@@ -1,0 +1,6 @@
+export enum ProductType {
+  INGREDIENT = 'INGREDIENT',
+  PREPARED_DISH = 'PREPARED_DISH',
+  BEVERAGE = 'BEVERAGE',
+  MISC = 'MISC',
+}

@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { idSchema } from './common';
-import { TRUCK_STATUS } from './enums';
+import { TruckStatus } from '../types';
 
 export const truckCreateSchema = z.object({
   franchiseeId: idSchema,
@@ -9,7 +9,7 @@ export const truckCreateSchema = z.object({
   model: z.string().optional(),
   purchaseDate: z.string().datetime().optional(),
   active: z.boolean().default(true),
-  currentStatus: z.enum(TRUCK_STATUS).default('AVAILABLE'),
+  currentStatus: z.nativeEnum(TruckStatus).default(TruckStatus.AVAILABLE),
 });
 
 export const truckUpdateSchema = truckCreateSchema.partial();

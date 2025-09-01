@@ -1,0 +1,5 @@
+export enum EventRegStatus {
+  REGISTERED = 'REGISTERED',
+  CANCELLED = 'CANCELLED',
+  ATTENDED = 'ATTENDED',
+}

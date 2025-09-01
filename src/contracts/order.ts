@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { idSchema, moneyStringSchema, decimalQtySchema } from './common';
-import { ORDER_STATUS, ORDER_CHANNEL } from './enums';
+import { Channel, OrderStatus } from '../types';
 
-export type OrderStatus = typeof ORDER_STATUS[number];
 
 export const orderLineSchema = z.object({
   menuItemId: idSchema,
@@ -17,19 +16,19 @@ export const orderCreateSchema = z.object({
   franchiseeId: idSchema,
   truckId: idSchema.optional(),
   warehouseId: idSchema.optional(),
-  channel: z.enum(ORDER_CHANNEL).default('IN_PERSON'),
+  channel: z.nativeEnum(Channel).default(Channel.IN_PERSON),
   scheduledPickupAt: z.string().datetime().optional(),
   lines: z.array(orderLineSchema).min(1),
 });
 
 export const orderStatusChangeSchema = z.object({
-  status: z.enum(ORDER_STATUS),
+  status: z.nativeEnum(OrderStatus),
 });
 
 export const orderQuerySchema = z.object({
   search: z.string().optional(),
-  status: z.enum(ORDER_STATUS).optional(),
-  channel: z.enum(ORDER_CHANNEL).optional(),
+  status: z.nativeEnum(OrderStatus).optional(),
+  channel: z.nativeEnum(Channel).optional(),
   from: z.string().optional(), // ISO date
   to: z.string().optional(),
   truckId: idSchema.optional(),

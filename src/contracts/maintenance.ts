@@ -1,14 +1,11 @@
 import { z } from 'zod';
 import { idSchema, moneyStringSchema } from './common';
-import { MAINTENANCE_STATUS, MAINTENANCE_TYPE } from './enums';
-
-export type MaintenanceType = typeof MAINTENANCE_TYPE[number];
-export type MaintenanceStatus = typeof MAINTENANCE_STATUS[number];
+import { MaintenanceType, MaintenanceStatus } from '../types';
 
 export const maintenanceCreateSchema = z.object({
   truckId: idSchema,
-  type: z.enum(MAINTENANCE_TYPE).default('SERVICE'),
-  status: z.enum(MAINTENANCE_STATUS).default('PLANNED'),
+  type: z.nativeEnum(MaintenanceType).default(MaintenanceType.SERVICE),
+  status: z.nativeEnum(MaintenanceStatus).default(MaintenanceStatus.PLANNED),
   scheduledAt: z.string().datetime().optional(),
   completedAt: z.string().datetime().optional(),
   cost: moneyStringSchema.optional(),
