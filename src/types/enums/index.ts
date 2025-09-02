@@ -13,3 +13,4 @@ export * from './LoyaltyTier';
 export * from './LoyaltyTxnType';
 export * from './EventRegStatus';
 export * from './StockMoveType';
+export * from './FranchiseRole';

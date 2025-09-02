@@ -1,10 +1,11 @@
-import type { Franchisee, User } from "..";
+import type { Franchisee, User, FranchiseRole } from "..";
+
 
 export interface FranchiseUser {
   id: string;
   userId: string;
   franchiseeId: string;
-  roleInFranchise?: string | null; // OWNER | MANAGER | STAFF
+  roleInFranchise?: FranchiseRole;
   user?: User;
   franchisee?: Franchisee;
 }
