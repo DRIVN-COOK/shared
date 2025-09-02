@@ -28,3 +28,4 @@ export * from './EventRegistration';
 export * from './SalesSummary';
 export * from './RevenueShareReport';
 export * from './AuditLog';
+export * from './Order';

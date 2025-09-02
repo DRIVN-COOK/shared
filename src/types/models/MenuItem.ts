@@ -1,15 +1,21 @@
-import type { ISODateString, DecimalString, Product } from '..';
+import type { ISODateString, DecimalString } from '..';
 
 export interface MenuItem {
   id: string;
-  productId?: string | null;
   name: string;
   description?: string | null;
   isActive: boolean;
   priceHT: DecimalString;
   tvaPct: DecimalString;
+  imageUrl?: string | null;
+
   createdAt: ISODateString;
   updatedAt: ISODateString;
+}
 
-  product?: Product | null;
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  page: number;
+  pageSize: number;
 }

@@ -1,3 +1,4 @@
+// shared/src/types/OrderStatus.ts
 export enum OrderStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
