@@ -1,8 +1,10 @@
 export enum POStatus {
-  DRAFT = 'DRAFT',
-  SUBMITTED = 'SUBMITTED',
-  PREPARING = 'PREPARING',
-  READY = 'READY',
-  DELIVERED = 'DELIVERED',
-  CANCELLED = 'CANCELLED',
+  DRAFT= 'Brouillon',
+  PENDING= 'En attente',
+  SUBMITTED= 'Soumise',
+  APPROVED= 'Approuvée',
+  ORDERED= 'Commandée',
+  PARTIALLY_RECEIVED= 'Partiellement reçue',
+  RECEIVED= 'Reçue',
+  CANCELLED='Annulée',
 }
