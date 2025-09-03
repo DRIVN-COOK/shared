@@ -1,7 +1,10 @@
 // src/contexts/AuthContext.tsx
 import { createContext, useContext, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
-import { api, setTokens, loadTokensFromStorage } from '../api.js';
+
+// 👉 on réutilise l'API centralisée du package shared
+import { api, setTokens, loadTokensFromStorage } from '@drivn-cook/shared';
+
 import { type User } from '../types/index.js';
 
 type AuthState = { user: User | null; isLoading: boolean };
@@ -14,43 +17,38 @@ type Ctx = AuthState & {
 
 const AuthContext = createContext<Ctx | null>(null);
 
-// --- Token guards stricts ---
+// Types de tokens pour les réponses /auth/login et /auth/register
 type StoredTokens = { accessToken: string; refreshToken: string };
-type StoredTokensLoose = { accessToken?: string; refreshToken?: string } | null | undefined;
-
-function isStoredTokens(x: unknown): x is StoredTokens {
-  return !!x && typeof (x as any).accessToken === 'string' && typeof (x as any).refreshToken === 'string';
-}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({ user: null, isLoading: true });
 
   useEffect(() => {
-    const raw = loadTokensFromStorage() as StoredTokensLoose;
+    let mounted = true;
 
-    // Pas de paire complète de tokens → pas d'appel /auth/me
-    if (!isStoredTokens(raw)) {
-      setState({ user: null, isLoading: false });
-      return;
-    }
+    // 1) Prime la mémoire interne (access/refresh) depuis localStorage
+    loadTokensFromStorage();
 
-    // ✅ Prime Axios avec les tokens avant /auth/me
-    setTokens(raw);
-
+    // 2) Tente /auth/me
     (async () => {
       try {
-        const r = await api.get<User>('/auth/me');
-        setState({ user: r.data, isLoading: false });
-      } catch (err: any) {
-        if (err?.response?.status !== 401) console.error(err);
-        setState({ user: null, isLoading: false });
+        const r = await api.get<User>('/auth/me'); // si 401 => intercepteur fera /auth/refresh puis rejouera
+        if (mounted) setState({ user: r.data, isLoading: false });
+      } catch {
+        if (mounted) setState({ user: null, isLoading: false });
       }
     })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   const login = async (email: string, password: string) => {
     const r = await api.post<StoredTokens>('/auth/login', { email, password });
-    setTokens(r.data); // met les headers axios + stocke localStorage
+    // Met à jour localStorage + in-memory + header Authorization
+    setTokens(r.data);
+
     const me = await api.get<User>('/auth/me');
     setState({ user: me.data, isLoading: false });
   };
@@ -58,18 +56,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (p: { email: string; password: string; firstName?: string; lastName?: string }) => {
     const r = await api.post<StoredTokens>('/auth/register', p);
     setTokens(r.data);
+
     const me = await api.get<User>('/auth/me');
     setState({ user: me.data, isLoading: false });
   };
 
   const logout = async () => {
     try {
+      // On tente une invalidation côté serveur si on a le refreshToken
       const raw = localStorage.getItem('auth_tokens');
-      const tokens = raw ? JSON.parse(raw) as StoredTokensLoose : null;
-      if (tokens && typeof tokens.refreshToken === 'string') {
+      const tokens = raw ? (JSON.parse(raw) as Partial<StoredTokens> | null) : null;
+      if (tokens?.refreshToken) {
         await api.post('/auth/logout', { refreshToken: tokens.refreshToken });
       }
     } finally {
+      // Quoi qu'il arrive on purge côté client
       setTokens(null);
       setState({ user: null, isLoading: false });
     }
